@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>AI Document Q&A</title>
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial;
+        }
+
+        body{
+            background:#f4f4f4;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            height:100vh;
+        }
+
+        .container{
+            width:450px;
+            background:white;
+            padding:30px;
+            border-radius:10px;
+            box-shadow:0 0 10px rgba(0,0,0,0.2);
+        }
+
+        h1{
+            text-align:center;
+            margin-bottom:20px;
+            color:#333;
+        }
+
+        input[type="file"],
+        input[type="text"]{
+
+            width:100%;
+            padding:10px;
+            margin-top:10px;
+            margin-bottom:15px;
+            border:1px solid #ccc;
+            border-radius:5px;
+        }
+
+        button{
+
+            width:100%;
+            padding:12px;
+            background:#2563eb;
+            color:white;
+            border:none;
+            border-radius:5px;
+            cursor:pointer;
+            font-size:16px;
+            margin-bottom:15px;
+        }
+
+        button:hover{
+            background:#1e40af;
+        }
+
+        #answerBox{
+
+            background:#eef2ff;
+            padding:15px;
+            border-radius:5px;
+            min-height:60px;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>AI Document Q&A</h1>
+
+    <input type="file"
+           id="fileInput">
+
+    <button onclick="uploadFile()">
+        Upload File
+    </button>
+
+    <input type="text"
+           id="question"
+           placeholder="Ask Question">
+
+    <button onclick="askAI()">
+        Ask AI
+    </button>
+
+    <div id="answerBox">
+        AI answer will appear here...
+    </div>
+
+</div>
+
+<script>
+
+    async function uploadFile(){
+
+        const fileInput =
+            document.getElementById("fileInput");
+
+        const file =
+            fileInput.files[0];
+
+        if(!file){
+
+            alert("Please select file");
+
+            return;
+        }
+
+        const formData =
+            new FormData();
+
+        formData.append("file", file);
+
+        try{
+
+            const response =
+                await fetch(
+                    "/api/files/upload",
+                    {
+                        method:"POST",
+                        body:formData
+                    }
+                );
+
+            if(response.ok){
+
+                alert("File Uploaded");
+
+            }else{
+
+                alert("Upload Failed");
+            }
+
+        }catch(error){
+
+            console.log(error);
+
+            alert("Server Error");
+        }
+    }
+
+    async function askAI(){
+
+        const question =
+            document.getElementById("question").value;
+
+        try{
+
+            const response =
+                await fetch(
+                    "/api/ai/ask",
+                    {
+                        method:"POST",
+
+                        headers:{
+                            "Content-Type":"application/json"
+                        },
+
+                        body:JSON.stringify({
+                            question:question
+                        })
+                    }
+                );
+
+            const data =
+                await response.json();
+
+            document.getElementById(
+                "answerBox"
+            ).innerHTML = data.answer;
+
+        }catch(error){
+
+            console.log(error);
+
+            alert("Error");
+        }
+    }
+
+</script>
+
+</body>
+</html>
